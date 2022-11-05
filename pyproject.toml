@@ -27,7 +27,6 @@ Changelog = "https://github.com/andrewthetechie/pydantic-sqs/releases"
 [tool.poetry.dependencies]
 python = "^3.7"
 pydantic = "^1.8.2"
-mypy = "^0.982"
 aiobotocore = "^2.4.0"
 
 
@@ -50,6 +49,7 @@ flake8-rst-docstrings = "^0.2.7"
 pep8-naming = "^0.13.2"
 darglint = "^1.8.1"
 reorder-python-imports = "^3.8.2"
+mypy = "^0.982"
 pre-commit-hooks = "^4.2.0"
 Pygments = "^2.13.0"
 pyupgrade = "^2.38.0"
@@ -100,7 +100,7 @@ dirty = true
 files = ["pydantic_sqs/__init__.py"]
 
 [tool.pytest.ini_options]
-addopts = "-n 4 --ignore examples --cov=pydantic_sqs --cov-report=term-missing --cov-fail-under 97"
+addopts = "-n 4 --ignore examples --cov=pydantic_sqs --cov-report=term-missing --no-cov"
 
 [tool.bandit]
 exclude= "tests/ examples/*"
