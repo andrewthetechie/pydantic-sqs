@@ -116,7 +116,7 @@ class SQSQueue(_AbstractQueue):
         wait_time_seconds: Optional[int] = None,
         ignore_empty: bool = False,
         ignore_unknown: bool = False,
-    ) -> list[Optional["SQSModel"]]:
+    ) -> List[Optional["SQSModel"]]:
         """from_sqs - gets messages from the queue and parses them into pydantic models.
 
         Args:     max_messages (int, optional): The maximum number of messages to return. Amazon SQS never returns more
