@@ -1,5 +1,6 @@
 """Module containing the model classes"""
 import json
+from typing import Dict
 
 from pydantic_sqs import exceptions
 from pydantic_sqs.abstract import _AbstractModel
@@ -15,7 +16,7 @@ class SQSModel(_AbstractModel):
 
     message_id: str = None  # type: ignore
     receipt_handle: str = None  # type: ignore
-    attributes: dict[str, str] = None  # type: ignore
+    attributes: Dict[str, str] = None  # type: ignore
     deleted: bool = False
 
     class Config:
