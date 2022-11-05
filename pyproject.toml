@@ -89,16 +89,8 @@ show_error_codes = true
 show_error_context = true
 
 [build-system]
-requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-[tool.poetry-dynamic-versioning]
-enable = false
-vcs = "git"
-dirty = true
-
-[tool.poetry-dynamic-versioning.substitution]
-files = ["pydantic_sqs/__init__.py"]
 
 [tool.pytest.ini_options]
 addopts = "-n auto --ignore examples --cov=pydantic_sqs --cov-report=term-missing --cov-fail-under 75"
