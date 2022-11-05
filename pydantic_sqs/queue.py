@@ -2,6 +2,7 @@
 import json
 from typing import Any
 from typing import Dict
+from typing import List
 from typing import Optional
 
 from aiobotocore.session import AioSession
@@ -97,7 +98,7 @@ class SQSQueue(_AbstractQueue):
         self.models[model_class.__qualname__.lower()] = model_class
 
     @property
-    def client_kwargs(self) -> dict[str, Any]:
+    def client_kwargs(self) -> Dict[str, Any]:
         """Returns a dict of kwargs for use with the AWS client.
 
         Returns:     dict[str, Any]: kwargs for constructing an aiobotocore client
@@ -189,10 +190,10 @@ class SQSQueue(_AbstractQueue):
 
     def __message_to_object(
         self,
-        message: dict[str, Any],
+        message: Dict[str, Any],
         message_id: str,
         receipt_handle: str,
-        attributes: dict[str, str],
+        attributes: Dict[str, str],
     ) -> "SQSModel":
         """
         Converts a SQS object to the pydantic model that represents it.
@@ -228,8 +229,8 @@ class SQSQueue(_AbstractQueue):
 
     async def __get_messages(
         self,
-        recv_kwargs: dict[str, Any],
-    ) -> list[dict[str, Any]]:
+        recv_kwargs: Dict[str, Any],
+    ) -> List[Dict[str, Any]]:
         """
         Get messages from SQS queue
 
