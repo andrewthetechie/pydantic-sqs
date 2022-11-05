@@ -8,7 +8,7 @@ Dependencies
 
 * `Python +3.7 <https://www.python.org>`_
 * `pydantic <https://github.com/samuelcolvin/pydantic/>`_
-* `aioboto3 <https://github.com/terrycain/aioboto3>`_
+* `aiobotocore <https://github.com/aio-libs/aiobotocore>`_
 
 
 .. toctree::
