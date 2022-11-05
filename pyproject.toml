@@ -66,6 +66,7 @@ pytest-xdist = "^2.5.0"
 tox = "^3.26.0"
 pylint = "^2.13.9"
 bandit = "^1.7.4"
+docker = "^6.0.1"
 
 [tool.coverage.paths]
 source = ["pydantic_sqs", "*/site-packages"]
@@ -100,7 +101,12 @@ dirty = true
 files = ["pydantic_sqs/__init__.py"]
 
 [tool.pytest.ini_options]
-addopts = "-n 4 --ignore examples --cov=pydantic_sqs --cov-report=term-missing --no-cov"
+addopts = "-n auto --ignore examples --cov=pydantic_sqs --cov-report=term-missing --cov-fail-under 97"
+env = [
+	"AWS_ACCESS_KEY_ID=x",
+	"AWS_SECRET_ACCESS_KEY=x",
+	"AWS_DEFAULT_REGION=us-east-1"
+]
 
 [tool.bandit]
 exclude= "tests/ examples/*"
