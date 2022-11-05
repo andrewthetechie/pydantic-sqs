@@ -101,7 +101,7 @@ dirty = true
 files = ["pydantic_sqs/__init__.py"]
 
 [tool.pytest.ini_options]
-addopts = "-n auto --ignore examples --cov=pydantic_sqs --cov-report=term-missing --cov-fail-under 97"
+addopts = "-n auto --ignore examples --cov=pydantic_sqs --cov-report=term-missing --cov-fail-under 75"
 env = [
 	"AWS_ACCESS_KEY_ID=x",
 	"AWS_SECRET_ACCESS_KEY=x",
