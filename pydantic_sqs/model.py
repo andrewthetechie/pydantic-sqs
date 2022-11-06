@@ -35,15 +35,11 @@ class SQSModel(_AbstractModel):
             SQSQueue: The queue this model is registered with
         """
         try:
-            if cls._queue is None:
-                raise exceptions.NotRegisteredError(
-                    f"{cls.__qualname__} not registered to a queue"
-                ) from None
+            return cls._queue
         except AttributeError:
             raise exceptions.NotRegisteredError(
                 f"{cls.__qualname__} not registered to a queue"
             ) from None
-        return cls._queue
 
     async def to_sqs(self, wait_time_in_seconds: int = None) -> None:
         """

@@ -22,12 +22,12 @@ class SQSQueue(_AbstractQueue):
     session: AioSession = None
     # The duration (in seconds) that the received messages are hidden from subsequent retrieve
     # requests after being retrieved by a from_sqs request
-    visibility_timeout: conint(ge=0, le=20) = None
+    visibility_timeout: int = None
 
     # The duration (in seconds) for which the call waits for a message to arrive in the queue before
     # returning. If a message is available, the call returns sooner than WaitTimeSeconds .
     # If no messages are available and the wait time expires, the call returns successfully with an empty list of messages.
-    wait_time_seconds: int = None
+    wait_time_seconds: conint(ge=0, le=20) = None
 
     # The maximum number of messages to return. Amazon SQS never returns more messages than
     # this value (however, fewer messages might be returned).
@@ -87,13 +87,11 @@ class SQSQueue(_AbstractQueue):
         A queue can handle multiple models, but only one queue per model.  Args:     model_class (SQSModel): The model
         class to register
         """
-        try:
-            if model_class._queue is not None:
-                raise exceptions.ModelAlreadyRegisteredError(
-                    f"{model_class._qual_name} is already registered to {model_class._queue.queue_url}"
-                )
-        except AttributeError:
-            pass
+        model_name = model_class.__qualname__.lower()
+        if model_name in self.models.keys():
+            raise exceptions.ModelAlreadyRegisteredError(
+                f"{model_class.__qualname__} is already registered to {model_class._queue.queue_url}"
+            )
         model_class._queue = self
         self.models[model_class.__qualname__.lower()] = model_class
 
@@ -109,29 +107,14 @@ class SQSQueue(_AbstractQueue):
 
         return kwargs
 
-    async def from_sqs(
+    def __recv_kwargs(
         self,
-        max_messages: Optional[int] = None,
-        visibility_timeout: Optional[int] = None,
-        wait_time_seconds: Optional[int] = None,
-        ignore_empty: bool = False,
-        ignore_unknown: bool = False,
-    ) -> List[Optional["SQSModel"]]:
-        """from_sqs - gets messages from the queue and parses them into pydantic models.
-
-        Args:     max_messages (int, optional): The maximum number of messages to return. Amazon SQS never returns more
-        messages than this value (however, fewer messages might be returned). Defaults to None.     visibility_timeout
-        (int, optional): The duration (in seconds) that the received messages are hidden from subsequent retrieve
-        requests after being retrieved by a from_sqs request. Defaults to None.     wait_time_seconds (int, optional):
-        The duration (in seconds) for which the call waits for a message to arrive in the queue before returning. If a
-        message is available, the call returns sooner than WaitTimeSeconds . If no messages are available and the wait
-        time expires, the call returns successfully with an empty list of messages. Defaults to None.     ignore_empty
-        (bool, optional): Whether or not to ignore an empty queue. Defaults to False. If True, an empty queue will
-        return an empty list and not raise a MsgNotFoundError     ignore_unknown (bool, optional): Whether or not to
-        ignore unknown messages. Defaults to False. If true, unknown messages will not raise an
-        InvaidMessageInQueueError and will simply return to the queue after their visibility timeout  Raises:
-        exceptions.MsgNotFoundError: If no messages are found in the queue     exceptions.InvaidMessageInQueueError: If
-        an unknown message is found in the queue.  Returns:     list[SQSModel]: A list of SQSModels from the queue
+        max_messages: Optional[int],
+        visibility_timeout: Optional[int],
+        wait_time_seconds: Optional[int],
+    ) -> dict[str, Any]:
+        """
+        __recv_kwargs - Get kwargs for recieving from sqs
         """
         recv_kwargs = {}
         recv_kwargs["MaxNumberOfMessages"] = (
@@ -159,6 +142,44 @@ class SQSQueue(_AbstractQueue):
                 recv_kwargs["WaitTimeSeconds"] = 20
 
         recv_kwargs["QueueUrl"] = self.queue_url
+        return recv_kwargs
+
+    async def from_sqs(
+        self,
+        max_messages: Optional[int] = None,
+        visibility_timeout: Optional[int] = None,
+        wait_time_seconds: Optional[int] = None,
+        ignore_empty: bool = False,
+        ignore_unknown: bool = False,
+    ) -> List[Optional["SQSModel"]]:
+        """from_sqs - gets messages from the queue and parses them into pydantic models.
+
+        Args:
+            max_messages (int, optional): The maximum number of messages to return. Amazon SQS never returns more
+                messages than this value (however, fewer messages might be returned). Defaults to None.
+            visibility_timeout (int, optional): The duration (in seconds) that the received messages are hidden
+                from subsequent retrieve requests after being retrieved by a from_sqs request. Defaults to None.
+            wait_time_seconds (int, optional): The duration (in seconds) for which the call waits for a message to
+                arrive in the queue before returning. If a message is available, the call returns sooner than
+                WaitTimeSeconds . If no messages are available and the wait time expires, the call returns
+                successfully with an empty list of messages. Defaults to None.
+            ignore_empty (bool, optional): Whether or not to ignore an empty queue. Defaults to False. If True,
+                an empty queue will return an empty list and not raise a MsgNotFoundError
+            ignore_unknown (bool, optional): Whether or not to ignore unknown messages. Defaults to False.
+                If true, unknown messages will not raise an InvaidMessageInQueueError and will simply return to the
+                queue after their visibility timeout
+        Raises:
+            exceptions.MsgNotFoundError: If no messages are found in the queue
+            exceptions.InvaidMessageInQueueError: If an unknown message is found in the queue.
+
+        Returns:
+            list[SQSModel]: A list of SQSModels from the queue
+        """
+        recv_kwargs = self.__recv_kwargs(
+            max_messages=max_messages,
+            visibility_timeout=visibility_timeout,
+            wait_time_seconds=wait_time_seconds,
+        )
 
         to_return = []
 
@@ -166,6 +187,11 @@ class SQSQueue(_AbstractQueue):
             messages = await self.__get_messages(recv_kwargs)
         except exceptions.MsgNotFoundError:
             if ignore_empty:
+                messages = []
+            else:
+                raise
+        except exceptions.InvaidMessageInQueueError:
+            if ignore_unknown:
                 messages = []
             else:
                 raise

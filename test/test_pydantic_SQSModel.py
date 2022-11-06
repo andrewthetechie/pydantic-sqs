@@ -1,20 +1,16 @@
 import pytest
 import pytest_asyncio
 from aiobotocore.session import get_session
+from pydantic_sqs import exceptions
 from pydantic_sqs import SQSModel
 from pydantic_sqs import SQSQueue
 
 
-class ThisModel(SQSModel):
-    test: str
-
-
-class ThatModel(SQSModel):
-    foo: str
-
-
 @pytest.mark.asyncio
 async def test_send_to_queue(localstack_queue):
+    class ThisModel(SQSModel):
+        test: str
+
     queue = localstack_queue[0]
     session = localstack_queue[1]
     client_kwargs = localstack_queue[2]
@@ -31,6 +27,9 @@ async def test_send_to_queue(localstack_queue):
 
 @pytest.mark.asyncio
 async def test_from_queue(localstack_queue):
+    class ThisModel(SQSModel):
+        test: str
+
     queue = localstack_queue[0]
     queue.register_model(ThisModel)
     test = ThisModel(test="test")
@@ -46,7 +45,25 @@ async def test_from_queue(localstack_queue):
 
 
 @pytest.mark.asyncio
+async def test_from_queue_empty(localstack_queue):
+    class ThisModel(SQSModel):
+        test: str
+
+    queue = localstack_queue[0]
+    queue.register_model(ThisModel)
+
+    with pytest.raises(exceptions.MsgNotFoundError):
+        await queue.from_sqs()
+
+    empty_list = await queue.from_sqs(ignore_empty=True)
+    assert len(empty_list) == 0
+
+
+@pytest.mark.asyncio
 async def test_delete(localstack_queue):
+    class ThisModel(SQSModel):
+        test: str
+
     queue = localstack_queue[0]
     session = localstack_queue[1]
     client_kwargs = localstack_queue[2]
@@ -68,6 +85,12 @@ async def test_delete(localstack_queue):
 
 @pytest.mark.asyncio
 async def test_multiple_models_in_queue(localstack_queue):
+    class ThisModel(SQSModel):
+        test: str
+
+    class ThatModel(SQSModel):
+        foo: str
+
     queue = localstack_queue[0]
     session = localstack_queue[1]
     client_kwargs = localstack_queue[2]
