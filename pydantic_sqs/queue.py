@@ -112,7 +112,7 @@ class SQSQueue(_AbstractQueue):
         max_messages: Optional[int],
         visibility_timeout: Optional[int],
         wait_time_seconds: Optional[int],
-    ) -> dict[str, Any]:
+    ) -> Dict[str, Any]:
         """
         __recv_kwargs - Get kwargs for recieving from sqs
         """
