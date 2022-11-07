@@ -15,7 +15,6 @@ Dependencies
    :maxdepth: 2
 
    quickstart
-   serialization
    development
    module
 
