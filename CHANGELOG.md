@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/andrewthetechie/pydantic-sqs/compare/v0.1.0...v0.1.1) (2022-12-06)
+
+
+### Documentation
+
+* update docs ([9bbbe93](https://github.com/andrewthetechie/pydantic-sqs/commit/9bbbe93c48f3a0206844f70aeb09609adfd981c1))
+
 ## 0.1.0 (2022-11-05)
 
 
