@@ -1,6 +1,6 @@
 [[package]]
 name = "aiobotocore"
-version = "2.4.1"
+version = "2.4.2"
 description = "Async client for aws services using botocore and aiohttp"
 category = "main"
 optional = false
@@ -1486,8 +1486,8 @@ content-hash = "080f72a8d5d10ef2764dfb74b3ef5cfc3af4eb4977c1ec9fcf429079084dac2b
 
 [metadata.files]
 aiobotocore = [
-    {file = "aiobotocore-2.4.1-py3-none-any.whl", hash = "sha256:26e0d55d5901f487c3467616c028abb85036ca33a0f88e279770adae6b865c69"},
-    {file = "aiobotocore-2.4.1.tar.gz", hash = "sha256:5c8ee79d1f14273e3f8f3af5c893db889ef163227b178ecacb5aea4547d3b9a7"},
+    {file = "aiobotocore-2.4.2-py3-none-any.whl", hash = "sha256:4acd1ebe2e44be4b100aa553910bda899f6dc090b3da2bc1cf3d5de2146ed208"},
+    {file = "aiobotocore-2.4.2.tar.gz", hash = "sha256:0603b74a582dffa7511ce7548d07dc9b10ec87bc5fb657eb0b34f9bd490958bf"},
 ]
 aiohttp = [
     {file = "aiohttp-3.8.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:ba71c9b4dcbb16212f334126cc3d8beb6af377f6703d9dc2d9fb3874fd667ee9"},
@@ -1900,6 +1900,7 @@ lazy-object-proxy = [
     {file = "lazy_object_proxy-1.8.0-pp39-pypy39_pp73-any.whl", hash = "sha256:ce58b2b3734c73e68f0e30e4e725264d4d6be95818ec0a0be4bb6bf9a7e79aa8"},
 ]
 livereload = [
+    {file = "livereload-2.6.3-py2.py3-none-any.whl", hash = "sha256:ad4ac6f53b2d62bb6ce1a5e6e96f1f00976a32348afedcb4b6d68df2a1d346e4"},
     {file = "livereload-2.6.3.tar.gz", hash = "sha256:776f2f865e59fde56490a56bcc6773b6917366bce0c267c60ee8aaf1a0959869"},
 ]
 MarkupSafe = [
