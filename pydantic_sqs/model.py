@@ -1,9 +1,10 @@
 """Module containing the model classes"""
 import json
-from typing import Dict
-
 from pydantic_sqs import exceptions
 from pydantic_sqs.abstract import _AbstractModel
+from typing import Dict
+from typing import List
+from typing import Optional
 
 
 class SQSModel(_AbstractModel):
@@ -41,6 +42,43 @@ class SQSModel(_AbstractModel):
                 f"{cls.__qualname__} not registered to a queue"
             ) from None
 
+    @classmethod
+    async def from_sqs(
+        cls,
+        max_messages: Optional[int] = None,
+        visibility_timeout: Optional[int] = None,
+        wait_time_seconds: Optional[int] = None,
+        ignore_empty: bool = True,
+    ) -> List[Optional["SQSModel"]]:
+        """from_sqs - gets this model from the queue
+
+        Args:
+            max_messages (int, optional): The maximum number of messages to return. Amazon SQS never returns more
+                messages than this value (however, fewer messages might be returned). Defaults to None.
+            visibility_timeout (int, optional): The duration (in seconds) that the received messages are hidden
+                from subsequent retrieve requests after being retrieved by a from_sqs request. Defaults to None.
+            wait_time_seconds (int, optional): The duration (in seconds) for which the call waits for a message to
+                arrive in the queue before returning. If a message is available, the call returns sooner than
+                WaitTimeSeconds . If no messages are available and the wait time expires, the call returns
+                successfully with an empty list of messages. Defaults to None.
+            ignore_empty (bool, optional): Whether or not to ignore an empty queue. Defaults to True. If True,
+                an empty queue will return an empty list and not raise a MsgNotFoundError
+        Raises:
+            exceptions.MsgNotFoundError: If no messages are found in the queue and ignore_empty is set to False
+
+        Returns:
+            list[SQSModel]: A list of SQSModels from the queue
+        """
+        queue = cls.__get_queue()
+        results = await queue.from_sqs(
+            max_messages,
+            visibility_timeout,
+            wait_time_seconds,
+            ignore_empty,
+            ignore_unknown=True,
+        )
+        return [result for result in results if isinstance(result, cls)]
+
     async def to_sqs(self, wait_time_in_seconds: int = None) -> None:
         """
         Send this object to SQS.
@@ -53,7 +91,6 @@ class SQSModel(_AbstractModel):
                 default value for the queue applies. Defaults to None. Greater than 0, less than or equal to 900
         """
         queue = self.__get_queue()
-        session = queue.session
 
         send_kwargs = {}
         if wait_time_in_seconds is not None:
@@ -70,7 +107,7 @@ class SQSModel(_AbstractModel):
                 "message": self.dict(exclude_unset=True),
             }
         )
-        async with session.create_client("sqs", **queue.client_kwargs) as client:
+        async with queue.session.create_client("sqs", **queue.client_kwargs) as client:
             response = await client.send_message(**send_kwargs)
         self.message_id = response["MessageId"]
 
