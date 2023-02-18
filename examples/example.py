@@ -8,7 +8,7 @@ from pydantic_sqs import SQSQueue
 
 
 class ThisModel(SQSModel):
-    foo: str = Field(..., description="Foo")
+    foo: int = Field(..., description="Foo")
 
 
 class ThatModel(SQSModel):
@@ -29,8 +29,8 @@ async def main():
     queue.register_model(ThisModel)
     queue.register_model(ThatModel)
 
-    this_thing = ThisModel(foo="1234")
-    that_thing = ThatModel(bar="5678")
+    this_thing = ThisModel(foo=1234)
+    that_thing = ThatModel(bar="baz")
     await this_thing.to_sqs()
     await that_thing.to_sqs()
 

@@ -1,10 +1,11 @@
 """Module containing the model classes"""
 import json
-from pydantic_sqs import exceptions
-from pydantic_sqs.abstract import _AbstractModel
 from typing import Dict
 from typing import List
 from typing import Optional
+
+from pydantic_sqs import exceptions
+from pydantic_sqs.abstract import _AbstractModel
 
 
 class SQSModel(_AbstractModel):
@@ -109,6 +110,7 @@ class SQSModel(_AbstractModel):
         )
         async with queue.session.create_client("sqs", **queue.client_kwargs) as client:
             response = await client.send_message(**send_kwargs)
+
         self.message_id = response["MessageId"]
 
     async def delete_from_queue(self):
