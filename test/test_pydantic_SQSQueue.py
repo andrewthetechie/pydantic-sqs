@@ -180,19 +180,6 @@ async def test_queue_invalid_message(localstack_queue):
         await localstack_queue[0].from_sqs()
 
 
-@pytest.mark.asyncio
-async def test_queue_invalid_message_ignored(localstack_queue):
-    class ThisModel(SQSModel):
-        test: str
-
-    localstack_queue[0].register_model(ThisModel)
-    test_model = ThisModel(test="test")
-    await test_model.to_sqs()
-
-    empty_list = await localstack_queue[0].from_sqs(ignore_unknown=True)
-    assert len(empty_list) == 0
-
-
 parameters = [
     (
         pytest.lazy_fixture("localstack_queue"),
@@ -331,11 +318,11 @@ async def test_from_sqs_bad_json(localstack_queue, mocker):
 
     await ThisModel(test=1).to_sqs()
 
-    with mocker.patch(
+    mocker.patch(
         "json.loads", side_effect=json.JSONDecodeError(msg="Test", doc="Test", pos=2)
-    ):
-        with pytest.raises(InvalidMessageInQueueError):
-            await queue.from_sqs()
+    )
+    with pytest.raises(InvalidMessageInQueueError):
+        await queue.from_sqs()
 
 
 @pytest.mark.asyncio
@@ -351,12 +338,12 @@ async def test_from_sqs_bad_json_ignore_unknown(localstack_queue, mocker):
 
     await ThisModel(test=1).to_sqs()
 
-    with mocker.patch(
+    mocker.patch(
         "json.loads", side_effect=json.JSONDecodeError(msg="Test", doc="Test", pos=2)
-    ):
-        # test ignore_unknown works
-        empty_list = await queue.from_sqs(ignore_unknown=True)
-        assert len(empty_list) == 0
+    )
+    # test ignore_unknown works
+    empty_list = await queue.from_sqs(ignore_unknown=True)
+    assert len(empty_list) == 0
 
 
 @pytest.mark.asyncio

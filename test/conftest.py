@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import time
 
 import docker
 import pytest_asyncio
@@ -20,6 +21,7 @@ def create_localstack_container(unused_tcp_port_factory):
             ports={"4566/tcp": port1, "4571/tcp": port2},
             detach=True,
         )
+        time.sleep(1)
         yield f"http://localhost:{port1}/", port2
     finally:
         container.remove(force=True)
