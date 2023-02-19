@@ -1,12 +1,9 @@
 import os
 import random
 import string
-import time
 
 import docker
-import pytest
 import pytest_asyncio
-from aiobotocore.session import AioSession
 from aiobotocore.session import get_session
 from pydantic_sqs import SQSQueue
 

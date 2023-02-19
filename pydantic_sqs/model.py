@@ -1,5 +1,6 @@
 """Module containing the model classes"""
 import json
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -80,6 +81,38 @@ class SQSModel(_AbstractModel):
         )
         return [result for result in results if isinstance(result, cls)]
 
+    def __send_kwargs(
+        self, queue_url: str, wait_time_in_seconds: int = None
+    ) -> Dict[str, Any]:
+        """
+        Create the send kwargs
+
+        Args:
+            wait_time_in_seconds (int, optional): The length of time, in seconds, for which to delay a specific message.
+                Valid values: 0 to 900. Maximum: 15 minutes. Messages with a positive DelaySeconds value become
+                available for processing after the delay period is finished. If you don't specify a value, the
+                default value for the queue applies. Defaults to None. Greater than 0, less than or equal to 900
+
+        Returns:
+            Dict[str, Any]: send kwargs
+        """
+        send_kwargs = {}
+        if wait_time_in_seconds is not None:
+            if wait_time_in_seconds < 0:
+                wait_time_in_seconds = 0
+            if wait_time_in_seconds > 900:
+                wait_time_in_seconds = 900
+            send_kwargs["DelaySeconds"] = wait_time_in_seconds
+
+        send_kwargs["QueueUrl"] = queue_url
+        send_kwargs["MessageBody"] = json.dumps(
+            {
+                "model": self.__class__.__qualname__.lower(),
+                "message": self.dict(exclude_unset=True),
+            }
+        )
+        return send_kwargs
+
     async def to_sqs(self, wait_time_in_seconds: int = None) -> None:
         """
         Send this object to SQS.
@@ -93,20 +126,8 @@ class SQSModel(_AbstractModel):
         """
         queue = self.__get_queue()
 
-        send_kwargs = {}
-        if wait_time_in_seconds is not None:
-            if wait_time_in_seconds < 0:
-                wait_time_in_seconds = 0
-            if wait_time_in_seconds > 900:
-                wait_time_in_seconds = 900
-            send_kwargs["DelaySeconds"] = wait_time_in_seconds
-
-        send_kwargs["QueueUrl"] = queue.queue_url
-        send_kwargs["MessageBody"] = json.dumps(
-            {
-                "model": self.__class__.__qualname__.lower(),
-                "message": self.dict(exclude_unset=True),
-            }
+        send_kwargs = self.__send_kwargs(
+            queue_url=queue.queue_url, wait_time_in_seconds=wait_time_in_seconds
         )
         async with queue.session.create_client("sqs", **queue.client_kwargs) as client:
             response = await client.send_message(**send_kwargs)

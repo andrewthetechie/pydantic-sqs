@@ -69,6 +69,7 @@ class SQSQueue(_AbstractQueue):
         """
         if session is None:
             session = get_session()
+
         super().__init__(
             queue_url=queue_url,
             aws_region=aws_region,
@@ -109,9 +110,9 @@ class SQSQueue(_AbstractQueue):
 
     def __recv_kwargs(
         self,
-        max_messages: Optional[int],
-        visibility_timeout: Optional[int],
-        wait_time_seconds: Optional[int],
+        max_messages: Optional[int] = None,
+        visibility_timeout: Optional[int] = None,
+        wait_time_seconds: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         __recv_kwargs - Get kwargs for recieving from sqs
@@ -166,11 +167,11 @@ class SQSQueue(_AbstractQueue):
             ignore_empty (bool, optional): Whether or not to ignore an empty queue. Defaults to False. If True,
                 an empty queue will return an empty list and not raise a MsgNotFoundError
             ignore_unknown (bool, optional): Whether or not to ignore unknown messages. Defaults to False.
-                If true, unknown messages will not raise an InvaidMessageInQueueError and will simply return to the
+                If true, unknown messages will not raise an InvalidMessageInQueueError and will simply return to the
                 queue after their visibility timeout
         Raises:
             exceptions.MsgNotFoundError: If no messages are found in the queue
-            exceptions.InvaidMessageInQueueError: If an unknown message is found in the queue.
+            exceptions.InvalidMessageInQueueError: If an unknown message is found in the queue.
 
         Returns:
             list[SQSModel]: A list of SQSModels from the queue
@@ -184,33 +185,34 @@ class SQSQueue(_AbstractQueue):
         to_return = []
 
         try:
-            messages = await self.__get_messages(recv_kwargs)
-        except exceptions.MsgNotFoundError:
+            messages = await self._get_messages(recv_kwargs)
+        except exceptions.MsgNotFoundError as exc:
             if ignore_empty:
                 messages = []
             else:
-                raise
-        except exceptions.InvaidMessageInQueueError:
-            if ignore_unknown:
-                messages = []
-            else:
-                raise
+                raise exc
+
         for msg in messages:
             try:
                 this_object = json.loads(msg["Body"])
+                to_return.append(
+                    self.__message_to_object(
+                        message=this_object,
+                        message_id=msg["MessageId"],
+                        receipt_handle=msg["ReceiptHandle"],
+                        attributes=msg.get("Attributes", None),
+                    )
+                )
             except json.JSONDecodeError as exc:
+                if ignore_unknown:
+                    continue
                 raise exceptions.InvalidMessageInQueueError(
                     f"Message {msg['MessageId']} is not valid JSON"
                 ) from exc
-
-            to_return.append(
-                self.__message_to_object(
-                    message=this_object,
-                    message_id=msg["MessageId"],
-                    receipt_handle=msg["ReceiptHandle"],
-                    attributes=msg.get("Attributes", None),
-                )
-            )
+            except exceptions.InvalidMessageInQueueError as exc:
+                if ignore_unknown:
+                    continue
+                raise exc
 
         return to_return
 
@@ -228,7 +230,7 @@ class SQSQueue(_AbstractQueue):
             message (dict[str, Any]): _description_
 
         Raises:
-            exceptions.InvaidMessageInQueueError: _description_
+            exceptions.InvalidMessageInQueueError: _description_
 
         Returns:
             SQSModel: _description_
@@ -236,7 +238,7 @@ class SQSQueue(_AbstractQueue):
         try:
             model = self.models[message["model"]]
         except KeyError:
-            raise exceptions.InvaidMessageInQueueError(
+            raise exceptions.InvalidMessageInQueueError(
                 f"No model registered to queue {self.queue_url} for model "
                 + f"type {message['model']} from {message_id}"
             ) from None
@@ -249,11 +251,11 @@ class SQSQueue(_AbstractQueue):
                 **message["message"],
             )
         except ValidationError as exc:
-            raise exceptions.InvaidMessageInQueueError(
+            raise exceptions.InvalidMessageInQueueError(
                 f"Invalid message {message_id} from queue {self.queue_url}"
             ) from exc
 
-    async def __get_messages(
+    async def _get_messages(
         self,
         recv_kwargs: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
@@ -272,6 +274,8 @@ class SQSQueue(_AbstractQueue):
         async with self.session.create_client("sqs", **self.client_kwargs) as client:
             response = await client.receive_message(**recv_kwargs)
 
-            if "Messages" not in response:
-                raise exceptions.MsgNotFoundError(f"{self.queue_url} is empty")
-        return response["Messages"]
+        messages = response.get("Messages", [response.get("Message", None)])
+        if messages[0] is None:
+            raise exceptions.MsgNotFoundError(f"{self.queue_url} is empty")
+
+        return messages

@@ -1,10 +1,6 @@
+import pytest
 from pydantic_sqs import exceptions
 from pydantic_sqs import SQSModel
-from pydantic_sqs import SQSQueue
-
-import pytest
-import pytest_asyncio
-from aiobotocore.session import get_session
 
 
 @pytest.mark.asyncio
@@ -166,3 +162,42 @@ async def test_multiple_models_in_queue(localstack_queue):
 
     from_sqs = await queue.from_sqs(max_messages=5)
     assert len(from_sqs) == 2
+
+
+def test_send_kwargs(localstack_queue):
+    class ThisModel(SQSModel):
+        test: str
+
+    queue = localstack_queue[0]
+    queue.register_model(ThisModel)
+    this_model = ThisModel(test="test")
+
+    kw_args = this_model._SQSModel__send_kwargs(queue_url=queue.queue_url)
+
+    assert "DelaySeconds" not in kw_args
+    assert kw_args["QueueUrl"] == queue.queue_url
+    assert isinstance(kw_args["MessageBody"], str)
+
+
+def test_send_kwargs_wait_time(localstack_queue):
+    class ThisModel(SQSModel):
+        test: str
+
+    queue = localstack_queue[0]
+    queue.register_model(ThisModel)
+    this_model = ThisModel(test="test")
+
+    # less than 0 becomes 0
+    assert (
+        this_model._SQSModel__send_kwargs(
+            queue_url=queue.queue_url, wait_time_in_seconds=-1
+        )["DelaySeconds"]
+        == 0
+    )
+    # greater than 900 becomes 900
+    assert (
+        this_model._SQSModel__send_kwargs(
+            queue_url=queue.queue_url, wait_time_in_seconds=901
+        )["DelaySeconds"]
+        == 900
+    )

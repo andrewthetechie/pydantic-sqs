@@ -14,7 +14,7 @@ class MessageNotInQueueError(PydanticSQSError):
     pass
 
 
-class InvaidMessageInQueueError(PydanticSQSError):
+class InvalidMessageInQueueError(PydanticSQSError):
     pass
 
 
