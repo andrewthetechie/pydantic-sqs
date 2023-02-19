@@ -63,6 +63,7 @@ pytest-xdist = "^3.2.0"
 pylint = "^2.13.9"
 bandit = "^1.7.4"
 docker = "^6.0.1"
+pytest-rerunfailures = "^11.1.1"
 
 [tool.coverage.paths]
 source = ["pydantic_sqs", "*/site-packages"]
@@ -89,7 +90,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-addopts = "-n auto --ignore examples --cov=pydantic_sqs --cov-report=term-missing --cov-fail-under 75"
+addopts = "-n auto --ignore examples --cov=pydantic_sqs --cov-report=term-missing --cov-fail-under 75 --reruns 3 --rerun-except AssertionError"
 env = [
 	"AWS_ACCESS_KEY_ID=x",
 	"AWS_SECRET_ACCESS_KEY=x",
