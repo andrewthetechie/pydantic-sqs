@@ -17,6 +17,7 @@ jobs:
           # - { python: "3.9", os: "ubuntu-latest", session: "mypy" }
           # - { python: "3.8", os: "ubuntu-latest", session: "mypy" }
           # - { python: "3.7", os: "ubuntu-latest", session: "mypy" }
+          - { python: "3.11", os: "ubuntu-latest", session: "tests" }
           - { python: "3.10", os: "ubuntu-latest", session: "tests" }
           - { python: "3.9", os: "ubuntu-latest", session: "tests" }
           - { python: "3.8", os: "ubuntu-latest", session: "tests" }
@@ -35,7 +36,7 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3.1.0
-
+      - uses: docker-practice/actions-setup-docker@master
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4.5.0
         with:
