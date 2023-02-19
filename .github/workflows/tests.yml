@@ -22,9 +22,9 @@ jobs:
           - { python: "3.9", os: "ubuntu-latest", session: "tests" }
           - { python: "3.8", os: "ubuntu-latest", session: "tests" }
           - { python: "3.7", os: "ubuntu-latest", session: "tests" }
-          - { python: "3.11", os: "windows-latest", session: "tests" }
+          # https://github.com/andrewthetechie/pydantic-sqs/issues/75
+          # - { python: "3.11", os: "windows-latest", session: "tests" }
           - { python: "3.11", os: "macos-latest", session: "tests" }
-          # - { python: "3.10", os: "ubuntu-latest", session: "typeguard" }
           - { python: "3.10", os: "ubuntu-latest", session: "xdoctest" }
           - { python: "3.10", os: "ubuntu-latest", session: "docs-build" }
 
@@ -38,9 +38,6 @@ jobs:
         uses: actions/checkout@v3.1.0
       - name: Setup Docker for localstack
         uses: docker-practice/actions-setup-docker@master
-      - name: Setup docker desktop on windows
-        run: choco install docker-desktop
-        if: ${{ matrix.os == 'windows-latest'}}
       - name: Test docker
         run: docker info
       - name: Set up Python ${{ matrix.python }}
