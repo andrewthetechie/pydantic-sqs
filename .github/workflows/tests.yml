@@ -36,8 +36,12 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3.1.0
-      - name: Set up Docker Buildx
+      - name: Setup Docker for localstack
+        uses: docker-practice/actions-setup-docker@master
+      - name: Set up Docker Buildx for localstack
         uses: docker/setup-buildx-action@v2
+      - name: Test docker
+        run: docker ps -a
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v4.5.0
         with:
