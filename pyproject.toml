@@ -36,16 +36,9 @@ aiobotocore = "^2.4.0"
 pytest = "^7.2.0"
 coverage = {extras = ["toml"], version = "^7.1.0"}
 safety = "^2.3.0"
-typeguard = "^2.13.2"
 xdoctest = {extras = ["colors"], version = "^1.1.0"}
 pre-commit = ">=2.12.1"
-flake8 = "^5.0.0"
-black = "^23.1.0"
-flake8-bugbear = ">=21.9.2"
-flake8-docstrings = "^1.6.0"
-flake8-rst-docstrings = "^0.2.7"
 pep8-naming = "^0.13.2"
-darglint = "^1.8.1"
 reorder-python-imports = "^3.8.2"
 mypy = "^0.982"
 pre-commit-hooks = "^4.2.0"
@@ -60,22 +53,10 @@ pytest-lazy-fixture = "^0.6.3"
 pytest-env = "^0.8.1"
 pytest-mockservers = "^0.6.0"
 pytest-xdist = "^3.2.0"
-pylint = "^2.13.9"
 bandit = "^1.7.4"
 docker = "^6.0.1"
 pytest-rerunfailures = "^11.1.1"
-
-[tool.coverage.paths]
-source = ["pydantic_sqs", "*/site-packages"]
-tests = ["tests", "*/tests"]
-
-[tool.coverage.run]
-branch = true
-source = ["pydantic_sqs"]
-
-[tool.coverage.report]
-show_missing = true
-fail_under = 98
+ruff = "^0.0.249"
 
 [tool.mypy]
 strict = true
@@ -90,19 +71,13 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-addopts = "-n auto --ignore examples --cov=pydantic_sqs --cov-report=term-missing --cov-fail-under 75 --reruns 3 --rerun-except AssertionError"
+addopts = "-n auto --ignore examples --cov=pydantic_sqs --cov-report xml:.coverage.xml --cov-report=term-missing --cov-fail-under 75 --reruns 3 --rerun-except AssertionError"
 env = [
 	"AWS_ACCESS_KEY_ID=x",
 	"AWS_SECRET_ACCESS_KEY=x",
 	"AWS_DEFAULT_REGION=us-east-1"
 ]
 
-[tool.bandit]
-exclude= "tests/ examples/*"
-
-[pylint.MASTER]
-extension-pkg-whitelist="pydantic"
-suggestion-mode="yes"
-
-[pylint.'MESSAGES CONTROL']
-disable="R0903,R0801"
+[tool.ruff]
+line-length = 120
+target-version = "py37"

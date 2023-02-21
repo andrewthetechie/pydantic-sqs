@@ -26,7 +26,8 @@ class SQSQueue(_AbstractQueue):
 
     # The duration (in seconds) for which the call waits for a message to arrive in the queue before
     # returning. If a message is available, the call returns sooner than WaitTimeSeconds .
-    # If no messages are available and the wait time expires, the call returns successfully with an empty list of messages.
+    # If no messages are available and the wait time expires, the call returns successfully with an empty
+    # list of messages.
     wait_time_seconds: conint(ge=0, le=20) = None
 
     # The maximum number of messages to return. Amazon SQS never returns more messages than
@@ -118,22 +119,16 @@ class SQSQueue(_AbstractQueue):
         __recv_kwargs - Get kwargs for recieving from sqs
         """
         recv_kwargs = {}
-        recv_kwargs["MaxNumberOfMessages"] = (
-            max_messages if max_messages is not None else self.max_messages
-        )
+        recv_kwargs["MaxNumberOfMessages"] = max_messages if max_messages is not None else self.max_messages
 
         recv_kwargs["VisibilityTimeout"] = (
-            visibility_timeout
-            if visibility_timeout is not None
-            else getattr(self, "visibility_timeout", None)
+            visibility_timeout if visibility_timeout is not None else getattr(self, "visibility_timeout", None)
         )
         if recv_kwargs["VisibilityTimeout"] is None:
             del recv_kwargs["VisibilityTimeout"]
 
         recv_kwargs["WaitTimeSeconds"] = (
-            wait_time_seconds
-            if wait_time_seconds is not None
-            else getattr(self, "wait_time_seconds", None)
+            wait_time_seconds if wait_time_seconds is not None else getattr(self, "wait_time_seconds", None)
         )
         if recv_kwargs["WaitTimeSeconds"] is None:
             del recv_kwargs["WaitTimeSeconds"]
@@ -206,9 +201,7 @@ class SQSQueue(_AbstractQueue):
             except json.JSONDecodeError as exc:
                 if ignore_unknown:
                     continue
-                raise exceptions.InvalidMessageInQueueError(
-                    f"Message {msg['MessageId']} is not valid JSON"
-                ) from exc
+                raise exceptions.InvalidMessageInQueueError(f"Message {msg['MessageId']} is not valid JSON") from exc
             except exceptions.InvalidMessageInQueueError as exc:
                 if ignore_unknown:
                     continue

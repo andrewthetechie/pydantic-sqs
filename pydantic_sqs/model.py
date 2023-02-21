@@ -14,7 +14,8 @@ class SQSModel(_AbstractModel):
     A SQSModel is a pydantic model that can be sent to and from SQS.
 
     By registering a model with a SQSQueue, you can then send and receive messages of that type from that SQS queue.
-    They will automatically be converted to and from JSON. You can also delete them from the queue after you've processed them.
+    They will automatically be converted to and from JSON. You can also delete them from the queue after you've
+    processed them.
     """
 
     message_id: str = None  # type: ignore
