@@ -1,7 +1,6 @@
 import os
 
 from pydantic import Field
-from pydantic import UUID4
 from pydantic_sqs import SQSModel
 from pydantic_sqs import SQSQueue
 
