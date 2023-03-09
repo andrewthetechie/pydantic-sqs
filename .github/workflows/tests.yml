@@ -24,7 +24,7 @@ jobs:
           - { python: "3.7", os: "ubuntu-latest", session: "tests" }
           # https://github.com/andrewthetechie/pydantic-sqs/issues/75
           # - { python: "3.11", os: "windows-latest", session: "tests" }
-          - { python: "3.11", os: "macos-latest", session: "tests" }
+          # - { python: "3.11", os: "macos-latest", session: "tests" }
           - { python: "3.10", os: "ubuntu-latest", session: "xdoctest" }
           - { python: "3.10", os: "ubuntu-latest", session: "docs-build" }
 
