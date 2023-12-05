@@ -41,7 +41,7 @@ jobs:
       - name: Test docker
         run: docker info
       - name: Set up Python ${{ matrix.python }}
-        uses: actions/setup-python@v4.7.0
+        uses: actions/setup-python@v4.8.0
         with:
           python-version: ${{ matrix.python }}
 
